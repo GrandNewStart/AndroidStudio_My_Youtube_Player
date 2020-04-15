@@ -1,4 +1,4 @@
-package com.example.videoplayer;
+package com.jinwoo.my_youtube_player;
 
 import org.junit.Test;
 

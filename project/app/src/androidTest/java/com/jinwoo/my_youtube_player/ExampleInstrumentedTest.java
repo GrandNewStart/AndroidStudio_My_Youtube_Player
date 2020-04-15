@@ -1,4 +1,4 @@
-package com.example.videoplayer;
+package com.jinwoo.my_youtube_player;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.example.videoplayer", appContext.getPackageName());
+        assertEquals("com.jinwoo.videolist", appContext.getPackageName());
     }
 }

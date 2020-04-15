@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">VideoPlayer</string>
+    <string name="app_name">My Youtube Player</string>
+    <string name="API_KEY">"AIzaSyDe_8mu0ywtgQ8zSkNQ2-bc5sOZ_ed2-DY"</string>
 </resources>
