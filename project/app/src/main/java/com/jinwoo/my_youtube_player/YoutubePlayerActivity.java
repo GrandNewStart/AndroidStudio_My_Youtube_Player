@@ -2,16 +2,17 @@ package com.jinwoo.my_youtube_player;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.widget.TextView;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 public class YoutubePlayerActivity extends YouTubeBaseActivity {
-    String videoID;
-    YouTubePlayerView player;
-    YouTubePlayer.OnInitializedListener onInitializedListener;
+    private String videoID;
+    private YouTubePlayerView ytpv_player;
+    private YouTubePlayer.OnInitializedListener onInitializedListener;
+    private TextView tv_description;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -20,9 +21,11 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
 
         Intent intent = getIntent();
         videoID = intent.getStringExtra("URL");
-        Toast.makeText(this, videoID, Toast.LENGTH_SHORT).show();
 
-        player = (YouTubePlayerView) findViewById(R.id.youtube_player);
+        ytpv_player = (YouTubePlayerView) findViewById(R.id.ytpv_youtube_player);
+        tv_description = (TextView) findViewById(R.id.tv_description);
+
+        //TODO: Get video description and map it on UI
 
         onInitializedListener = new YouTubePlayer.OnInitializedListener() {
             @Override
@@ -36,6 +39,6 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity {
             }
         };
 
-        player.initialize(String.valueOf(R.string.API_KEY), onInitializedListener);
+        ytpv_player.initialize(String.valueOf(R.string.API_KEY), onInitializedListener);
     }
 }

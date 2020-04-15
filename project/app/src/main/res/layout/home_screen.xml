@@ -29,48 +29,63 @@
             android:id="@+id/text_top"
             android:layout_width="wrap_content"
             android:layout_height="75dp"
-            android:layout_weight="5"
+            android:layout_weight="9"
             android:gravity="center"
             android:text="저장된 재생 목록"
             android:textColor="#ffffff"
             android:textSize="20dp" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginEnd="16dp"
-            android:orientation="vertical"
-            android:layout_weight="4">
-
-            <ImageView
-                android:id="@+id/iv_profile"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center" />
-
-            <TextView
-                android:id="@+id/tv_nickname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="google nickname" />
-
-        </LinearLayout>
-
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/listviewMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="right"
+        app:layout_constraintEnd_toEndOf="@+id/title"
+        app:layout_constraintTop_toBottomOf="@+id/title">
+
+        <TextView
+            android:id="@+id/tv_selectAll"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
+            android:text="전체선택"
+            android:textSize="17dp"
+            android:gravity="center"
+            android:layout_toLeftOf="@+id/cb_selectAll"/>
+
+        <CheckBox
+            android:id="@+id/cb_selectAll"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:gravity="center"/>
+
+        <ImageView
+            android:id="@+id/iv_listMenu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/icon_menu4" />
+
+    </RelativeLayout>
+
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="8dp"
-        app:layout_constraintDimensionRatio="1:1.6"
+        android:choiceMode="multipleChoice"
+        app:layout_constraintDimensionRatio="1:1.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title"
-        android:choiceMode="multipleChoice"/>
+        app:layout_constraintTop_toBottomOf="@+id/listviewMenu" />
 
     <Button
         android:id="@+id/button_delete"
@@ -85,10 +100,10 @@
         android:id="@+id/button_add"
         android:layout_width="75dp"
         android:layout_height="75dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="32dp"
         android:background="@drawable/icon_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,38 +5,34 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
-import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    ListView listView;
-    TextView nickname;
-    Button add, delete;
-    ImageView profilePhoto;
-    TextView top;
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+    private ListView listView;
+    private TextView tv_top, tv_selectAll;
+    private Button btn_add, btn_delete;
+    private ImageView iv_listMenu;
+    private CheckBox cb_selectAll;
 
-    ArrayList<Video> videoList = new ArrayList<Video>();
-    VideoAdapter adapter;
-    String videoID = "";
-    VideoDBHelper myDb;
-
-    enum Mode {normal, check};
-    Mode mode = Mode.normal;
+    private ArrayList<Video> videoList = new ArrayList<Video>();
+    private VideoAdapter adapter;
+    private String videoID = "", Google_nick, Google_photo;
+    private VideoDBHelper myDb;
+    private enum Mode {normal, check};
+    private Mode mode = Mode.normal;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,39 +40,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.home_screen);
 
         Intent intent = getIntent();
-        String nick = intent.getStringExtra("NICKNAME");
-        String photo = intent.getStringExtra("PHOTO URL");
+        Google_nick = intent.getStringExtra("NICKNAME");
+        Google_photo = intent.getStringExtra("PHOTO URL");
 
         // View mapping
+        iv_listMenu = (ImageView) findViewById(R.id.iv_listMenu);
         listView = (ListView) findViewById(R.id.listView);
-        nickname = (TextView) findViewById(R.id.tv_nickname);
-        add = (Button) findViewById(R.id.button_add);
-        delete = (Button) findViewById(R.id.button_delete);
-        profilePhoto = (ImageView) findViewById(R.id.iv_profile);
-        top = (TextView) findViewById(R.id.text_top);
-
-        // Mapping Google info into UIs
-        nickname.setText(nick);
-        Glide.with(this).load(photo).into(profilePhoto);
+        btn_add = (Button) findViewById(R.id.button_add);
+        btn_delete = (Button) findViewById(R.id.button_delete);
+        tv_top = (TextView) findViewById(R.id.text_top);
+        tv_selectAll = (TextView) findViewById(R.id.tv_selectAll);
+        cb_selectAll = (CheckBox) findViewById(R.id.cb_selectAll);
 
         // Load data from database and attach it to the listview in normal mode
-        viewListMode(Mode.normal);
+        setListMode(Mode.normal);
 
         // Set click listeners
-        add.setOnClickListener(new View.OnClickListener(){
+        iv_listMenu.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                viewListMode(Mode.normal);
+                PopupMenu menu = new PopupMenu(MainActivity.this, v);
+                menu.setOnMenuItemClickListener(MainActivity.this);
+                menu.inflate(R.menu.listview_menu);
+                menu.show();
+            }
+        });
+
+        cb_selectAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = 0; i < videoList.size(); i++) {
+                    videoList.get(i).setChecked(cb_selectAll.isChecked());
+                }
+                adapter = new VideoAdapter(videoList, getApplicationContext(), 2);
+                listView.setAdapter(adapter);
+            }
+        });
+
+        btn_add.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                setListMode(Mode.normal);
                 Intent intent = new Intent(MainActivity.this, AddVideoActivity.class);
                 startActivityForResult(intent, 0);
             }
         });
 
-        delete.setOnClickListener(new View.OnClickListener(){
+        btn_delete.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 myDb = new VideoDBHelper(getApplicationContext());
                 Cursor cursor = myDb.getAllData();
+
+                if (cursor.getCount() == 0) {
+                    Toast.makeText(MainActivity.this, "영상을 선택해주십시오", Toast.LENGTH_SHORT);
+                    return;
+                }
 
                 while(cursor.moveToNext()) {
                     int i = cursor.getPosition();
@@ -86,13 +105,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         myDb.deleteData(video.getID());
                     }
                 }
-                viewListMode(Mode.normal);
+                setListMode(Mode.normal);
             }
         });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 if (mode == Mode.normal) {
                     Intent intent = new Intent(getApplicationContext(), YoutubePlayerActivity.class);
                     intent.putExtra("URL", videoList.get(position).getVideoID());
@@ -103,24 +123,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+
     }
 
-
-    public void viewListMode(Mode newMode) {
+    public void setListMode(Mode newMode) {
         mode = newMode;
-
-        switch(mode) {
-            case normal:
-                top.setText("저장된 재생 목록");
-                top.setTextSize(20);
-                delete.setVisibility(View.INVISIBLE);
-                break;
-            case check:
-                top.setText("삭제할 동영상을 선택하십시오");
-                top.setTextSize(15);
-                delete.setVisibility(View.VISIBLE);
-                break;
-        }
 
         myDb = new VideoDBHelper(getApplicationContext());
         Cursor cursor = myDb.getAllData();
@@ -142,11 +149,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-        switch (mode) {
+        switch(mode) {
             case normal:
+                tv_top.setText(Google_nick + "님의\n저장된 재생 목록");
+                tv_top.setTextSize(15);
+                btn_delete.setVisibility(View.INVISIBLE);
+                tv_selectAll.setVisibility(View.INVISIBLE);
+                cb_selectAll.setVisibility(View.INVISIBLE);
+                iv_listMenu.setVisibility(View.VISIBLE);
                 adapter = new VideoAdapter(videoList, getApplicationContext(), 1);
                 break;
             case check:
+                tv_top.setText("삭제할 동영상을 선택하십시오");
+                tv_top.setTextSize(15);
+                btn_delete.setVisibility(View.VISIBLE);
+                tv_selectAll.setVisibility(View.VISIBLE);
+                cb_selectAll.setVisibility(View.VISIBLE);
+                iv_listMenu.setVisibility(View.INVISIBLE);
+                cb_selectAll.setChecked(false);
                 adapter = new VideoAdapter(videoList, getApplicationContext(), 2);
                 break;
         }
@@ -155,12 +175,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {}
-
-    @Override
     public void onBackPressed() {
         if (mode != Mode.normal) {
-            viewListMode(Mode.normal);
+            setListMode(Mode.normal);
         }
         else {
             finish();
@@ -201,55 +218,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void registerForContextMenu(View view) {
-        super.registerForContextMenu(view);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.item_menu, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        myDb = new VideoDBHelper(getApplicationContext());
-        Cursor cursor = myDb.getAllData();
-
-        if (cursor.getCount() == 0) {
-            videoList.clear();
-        }
-        else {
-            videoList.clear();
-            while (cursor.moveToNext()) {
-                Video video = new Video(
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getString(5));
-                video.setID(cursor.getInt(0));
-                videoList.add(video);
-            }
-        }
-
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        switch(item.getItemId()){
-            case R.id.menu1:
-                // Hide video info
-                Log.d("DEBUG", info.position+"");
-                videoList.get(info.position);
-                Resources res = getResources();
-                Drawable img = res.getDrawable(R.drawable.icon_play);
-                break;
-            case R.id.menu2:
-                // Change video
-                break;
-            case R.id.menu3:
-                // Delete video
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.listview_menu1:
+                // Go to check mode
+                setListMode(Mode.check);
                 break;
         }
-        return super.onContextItemSelected(item);
+        return false;
     }
 }

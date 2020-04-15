@@ -1,7 +1,5 @@
 package com.jinwoo.my_youtube_player;
 
-import android.graphics.drawable.Drawable;
-
 public class Video {
     private int ID;
     private String thumbnail;

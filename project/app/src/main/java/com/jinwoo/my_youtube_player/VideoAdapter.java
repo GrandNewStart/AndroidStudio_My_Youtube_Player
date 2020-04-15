@@ -8,11 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -21,18 +20,20 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class VideoAdapter extends BaseAdapter {
-    ArrayList<Video> videoList;
-    LayoutInflater inflater;
-    ImageView iv_thumbnail;
-    ConstraintLayout background;
-    TextView tv_title, tv_uploader, tv_date;
-    Button btn_itemMenu;
-    CheckBox cb_checkbox;
-    int LISTVIEW_MODE;
-    Bitmap bitmap;
+    private ArrayList<Video> videoList;
+    private LayoutInflater inflater;
+    private Context context;
+    private Bitmap bitmap;
+    private int LISTVIEW_MODE;
+
+    private ImageView iv_thumbnail;
+    private LinearLayout background;
+    private TextView tv_title, tv_uploader, tv_date;
+    private CheckBox cb_checkbox;
 
     public VideoAdapter(ArrayList<Video> videoList, Context context, int mode) {
         this.videoList = videoList;
+        this.context = context;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LISTVIEW_MODE = mode;
     }
@@ -56,18 +57,17 @@ public class VideoAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = inflater.inflate(R.layout.item_layout, parent, false);
 
-        background = (ConstraintLayout) convertView.findViewById(R.id.itemBackground);
+        background = (LinearLayout) convertView.findViewById(R.id.itemBackground);
         iv_thumbnail = (ImageView) convertView.findViewById(R.id.img_thumbnail);
-        tv_title = (TextView) convertView.findViewById(R.id.text_title);
-        tv_uploader = (TextView) convertView.findViewById(R.id.text_uploader);
-        tv_date = (TextView) convertView.findViewById(R.id.text_date);
-        btn_itemMenu = (Button) convertView.findViewById(R.id.btn_itemMenu);
+        tv_title = (TextView) convertView.findViewById(R.id.tv_title);
+        tv_uploader = (TextView) convertView.findViewById(R.id.tv_uploader);
+        tv_date = (TextView) convertView.findViewById(R.id.tv_date);
         cb_checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 
         final Video video = videoList.get(position);
         final int checkboxPosition = position;
 
-        // Getting thumbnail img
+        // Getting thumbnail img from network
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -95,11 +95,13 @@ public class VideoAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        // Mapping other UIs
         tv_title.setText(video.getTitle());
         tv_uploader.setText(video.getUploader());
         tv_date.setText(video.getDate());
         cb_checkbox.setChecked(video.isChecked());
 
+        // Checkbox logic
         cb_checkbox.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -109,12 +111,10 @@ public class VideoAdapter extends BaseAdapter {
         });
         cb_checkbox.setChecked(video.isChecked());
 
-
         switch (LISTVIEW_MODE) {
             // normal mode
             case 1:
                 background.setBackgroundColor(Color.parseColor("#B57171"));
-                btn_itemMenu.setVisibility(View.VISIBLE);
                 cb_checkbox.setVisibility(View.INVISIBLE);
                 cb_checkbox.setActivated(false);
                 break;
@@ -122,7 +122,6 @@ public class VideoAdapter extends BaseAdapter {
             // check mode
             case 2:
                 background.setBackgroundColor(Color.parseColor("#A07771"));
-                btn_itemMenu.setVisibility(View.INVISIBLE);
                 cb_checkbox.setVisibility(View.VISIBLE);
                 cb_checkbox.setActivated(true);
                 break;
