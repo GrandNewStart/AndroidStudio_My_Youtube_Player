@@ -2,6 +2,7 @@ package com.jinwoo.my_youtube_player;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -86,6 +87,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             intent.putExtra("NICKNAME", account.getDisplayName());
                             intent.putExtra("PHOTO URL", String.valueOf(account.getPhotoUrl()));
                             startActivity(intent);
+                            finish();
                         }
                         // If login was unsuccessful
                         else {
@@ -97,6 +99,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.d("CONNECTION", "FAILED");
     }
 }

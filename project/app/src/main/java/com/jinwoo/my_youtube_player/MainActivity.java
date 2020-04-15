@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     VideoAdapter adapter;
     String videoID = "";
     VideoDBHelper myDb;
+
     enum Mode {normal, check};
     Mode mode = Mode.normal;
 
@@ -92,14 +92,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                myDb = new VideoDBHelper(getApplicationContext());
-                Cursor cursor = myDb.getAllData();
-
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mode == Mode.normal) {
-                    Intent intent = new Intent(getApplicationContext(), YoutubePlayer.class);
+                    Intent intent = new Intent(getApplicationContext(), YoutubePlayerActivity.class);
                     intent.putExtra("URL", videoList.get(position).getVideoID());
                     startActivity(intent);
+                }
+                else {
+                    videoList.get(position).setChecked(!videoList.get(position).isChecked());
                 }
             }
         });
@@ -155,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public void onClick(View v) {}
+
+    @Override
     public void onBackPressed() {
         if (mode != Mode.normal) {
             viewListMode(Mode.normal);
@@ -163,9 +166,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             finish();
         }
     }
-
-    @Override
-    public void onClick(View v) {}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

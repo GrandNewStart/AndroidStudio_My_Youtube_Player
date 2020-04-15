@@ -8,7 +8,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-public class YoutubePlayer extends YouTubeBaseActivity {
+public class YoutubePlayerActivity extends YouTubeBaseActivity {
     String videoID;
     YouTubePlayerView player;
     YouTubePlayer.OnInitializedListener onInitializedListener;

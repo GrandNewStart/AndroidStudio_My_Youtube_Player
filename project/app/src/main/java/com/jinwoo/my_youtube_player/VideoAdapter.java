@@ -109,12 +109,14 @@ public class VideoAdapter extends BaseAdapter {
         });
         cb_checkbox.setChecked(video.isChecked());
 
+
         switch (LISTVIEW_MODE) {
             // normal mode
             case 1:
                 background.setBackgroundColor(Color.parseColor("#B57171"));
                 btn_itemMenu.setVisibility(View.VISIBLE);
                 cb_checkbox.setVisibility(View.INVISIBLE);
+                cb_checkbox.setActivated(false);
                 break;
 
             // check mode
@@ -122,6 +124,7 @@ public class VideoAdapter extends BaseAdapter {
                 background.setBackgroundColor(Color.parseColor("#A07771"));
                 btn_itemMenu.setVisibility(View.INVISIBLE);
                 cb_checkbox.setVisibility(View.VISIBLE);
+                cb_checkbox.setActivated(true);
                 break;
         }
 

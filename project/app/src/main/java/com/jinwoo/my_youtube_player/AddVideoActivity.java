@@ -81,7 +81,7 @@ public class AddVideoActivity extends AppCompatActivity {
                                     .getJSONObject(0)
                                     .getJSONObject("snippet");
 
-                            date = jsonObject.getString("publishedAt").substring(0,9);
+                            date = jsonObject.getString("publishedAt").substring(0,10);
                             title = jsonObject.getString("title");
                             uploader = jsonObject.getString("channelTitle");
                             thumbnail = jsonObject.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
