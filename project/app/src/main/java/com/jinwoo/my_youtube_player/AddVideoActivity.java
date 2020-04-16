@@ -2,9 +2,15 @@ package com.jinwoo.my_youtube_player;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,14 +25,16 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AddVideoActivity extends AppCompatActivity {
-    EditText et_url;
-    Button btn_enter, btn_cancel;
-    String input, title, thumbnail, date, uploader, url;
-    OkHttpClient client;
+    private EditText et_url;
+    private Button btn_enter, btn_cancel;
+    private String input, title, thumbnail, date, uploader, url;
+    private final String API_KEY = "AIzaSyDe_8mu0ywtgQ8zSkNQ2-bc5sOZ_ed2-DY";
+    private OkHttpClient client;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.add_screen);
 
         et_url = (EditText) findViewById(R.id.et_url);
@@ -58,10 +66,15 @@ public class AddVideoActivity extends AppCompatActivity {
                     }
                 }
 
+                if (videoID.equals("")) {
+                    Toast.makeText(AddVideoActivity.this, "잘못된 URL입니다.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 // Retrieve JSON object and parse it
                 url = "https://www.googleapis.com/youtube/v3/videos" +
                         "?id=" + videoID +
-                        "&key=AIzaSyDe_8mu0ywtgQ8zSkNQ2-bc5sOZ_ed2-DY" +
+                        "&key=" + API_KEY +
                         "&part=snippet" +
                         "&fields=items(snippet(title, thumbnails(medium),publishedAt,channelTitle))";
                 client = new OkHttpClient();
@@ -69,8 +82,7 @@ public class AddVideoActivity extends AppCompatActivity {
                 final String finalVideoID = videoID;
                 client.newCall(request).enqueue(new Callback() {
                     @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    }
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) { }
 
                     @Override
                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
@@ -80,7 +92,10 @@ public class AddVideoActivity extends AppCompatActivity {
                                     .getJSONArray("items")
                                     .getJSONObject(0)
                                     .getJSONObject("snippet");
-
+                            if (jsonObject.toString().equals(null)) {
+                                Toast.makeText(AddVideoActivity.this, "잘못된 URL입니다.", Toast.LENGTH_SHORT);
+                                return;
+                            }
                             date = jsonObject.getString("publishedAt").substring(0,10);
                             title = jsonObject.getString("title");
                             uploader = jsonObject.getString("channelTitle");

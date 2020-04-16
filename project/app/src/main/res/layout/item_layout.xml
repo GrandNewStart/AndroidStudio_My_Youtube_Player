@@ -40,6 +40,7 @@
             android:id="@+id/tv_uploader"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:text="name of the uploader"
             android:textColor="#333333"
             app:layout_constraintStart_toEndOf="@+id/img_thumbnail"
@@ -57,13 +58,12 @@
     </LinearLayout>
 
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+    <ImageView
+        android:id="@+id/iv_itemMenu"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_weight="1"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+        android:layout_gravity="center"
+        android:src="@drawable/icon_menu3" />
 
 </LinearLayout>
