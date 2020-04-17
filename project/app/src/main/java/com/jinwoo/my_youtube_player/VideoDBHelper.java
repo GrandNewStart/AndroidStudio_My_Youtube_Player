@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import androidx.annotation.Nullable;
 
 public class VideoDBHelper extends SQLiteOpenHelper {
@@ -58,8 +59,16 @@ public class VideoDBHelper extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE ID = " + id);
     }
 
-    public void updateData(int id, String url) {
+    public void updateData(int id, Video video) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE " + TABLE_NAME + " SET URL = '" + url + "' WHERE ID = " + id);
+        String query = "UPDATE " + TABLE_NAME
+                + " SET THUMBNAIL = '" + video.getThumbnail() + "'"
+                + ", TITLE = '" + video.getTitle() + "'"
+                + ", UPLOADER = '" + video.getUploader() + "'"
+                + ", DATE = '" + video.getDate() + "'"
+                + ", VIDEOID = '" + video.getVideoID() + "'"
+                + " WHERE ID = " + id;
+        Log.d("LOG", "query = " + query);
+        db.execSQL(query);
     }
 }

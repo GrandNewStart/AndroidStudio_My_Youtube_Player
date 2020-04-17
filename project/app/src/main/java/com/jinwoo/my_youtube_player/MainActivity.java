@@ -1,11 +1,10 @@
 package com.jinwoo.my_youtube_player;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private ArrayList<Video> videoList = new ArrayList<Video>();
     private VideoAdapter adapter;
-    private String videoID = "", Google_nick, Google_photo;
+    private String Google_nick, Google_photo;
     private VideoDBHelper myDb;
     public enum Mode {normal, check};
     public static Mode mode = Mode.normal;
@@ -106,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         btn_add.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                setListMode(Mode.normal);
                 setListMode(Mode.normal);
                 Intent intent = new Intent(MainActivity.this, AddVideoActivity.class);
                 startActivityForResult(intent, 0);
@@ -195,28 +194,19 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // If URL data is fetched from the user
+        // If new video is to be added
         if (resultCode == 1) {
-            videoID = data.getStringExtra("VIDEOID");
-            if (videoID.equals("")) {
-                return;
-            }
-
+            String videoID = data.getStringExtra("VIDEOID");
             String title = data.getStringExtra("TITLE");
             String thumbnail = data.getStringExtra("THUMBNAIL");
             String date = data.getStringExtra("DATE");
             String uploader = data.getStringExtra("UPLOADER");
-            Resources res = getResources();
-            Drawable img = ResourcesCompat.getDrawable(res, R.drawable.icon_play, null);
-
             Video video = new Video(thumbnail, title, uploader, date, videoID);
 
-            if (myDb.insertData(thumbnail, title, uploader, date, videoID)) {
-                Toast.makeText(getApplicationContext(),"플레이 리스트 추가", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(getApplicationContext(),"실패", Toast.LENGTH_SHORT).show();
-            }
+            if (myDb.insertData(thumbnail, title, uploader, date, videoID))
+                Toast.makeText(MainActivity.this, "플레이 리스트 추가", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(MainActivity.this,"실패", Toast.LENGTH_SHORT).show();
 
             Cursor cursor = myDb.getAllData();
             int ID = 0;
@@ -225,6 +215,32 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             videoList.add(video);
             adapter.notifyDataSetChanged();
+
+        }
+
+        // If an existing video is to be updated
+        else if (resultCode == 2) {
+            int ID = data.getIntExtra("ID", -1);
+            String videoID = data.getStringExtra("VIDEOID");
+            String title = data.getStringExtra("TITLE");
+            String thumbnail = data.getStringExtra("THUMBNAIL");
+            String date = data.getStringExtra("DATE");
+            String uploader = data.getStringExtra("UPLOADER");
+            Video video = new Video(thumbnail, title, uploader, date, videoID);
+            Log.d("LOG", ID + ", " + video.getTitle());
+            myDb.updateData(ID, video);
+
+            for (int i = 0; i < videoList.size(); i++) {
+                if (videoList.get(i).getID() == ID) {
+                    videoList.get(i).setTitle(title);
+                    videoList.get(i).setThumbnail(thumbnail);
+                    videoList.get(i).setDate(date);
+                    videoList.get(i).setUploader(uploader);
+                    videoList.get(i).setVideoID(videoID);
+                    adapter.notifyDataSetChanged();
+                    break;
+                }
+            }
         }
     }
 

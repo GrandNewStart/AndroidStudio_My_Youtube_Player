@@ -6,12 +6,24 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.IOException;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ChangeVideoActivity extends AppCompatActivity {
-    private EditText input;
-    private Button update, cancel;
+    private EditText et_url;
+    private Button btn_update, btn_cancel;
+    private String title, thumbnail, date, uploader;
+    private final String API_KEY = "AIzaSyDe_8mu0ywtgQ8zSkNQ2-bc5sOZ_ed2-DY";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -22,38 +34,73 @@ public class ChangeVideoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final int ID = intent.getIntExtra("ID", -1);
 
-        input = (EditText) findViewById(R.id.et_url);
-        update = (Button) findViewById(R.id.btn_enter);
-        cancel = (Button) findViewById(R.id.btn_cancel);
+        et_url = (EditText) findViewById(R.id.et_url);
+        btn_update = (Button) findViewById(R.id.btn_enter);
+        btn_cancel = (Button) findViewById(R.id.btn_cancel);
 
-        update.setOnClickListener(new View.OnClickListener() {
+        btn_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = input.getText().toString();
+                String input = et_url.getText().toString();
 
                 // Parsing the URL in search of the Video ID
-                String videoID = "";
-                int count = 0;
-                for (int i = 0; i < url.length(); i++) {
-                    if (url.charAt(i) == '/') {
-                        count++;
-                        continue;
-                    }
-                    if (count == 3) {
-                        videoID = url.substring(i);
-                        break;
-                    }
+                final String videoID = parseURL(input);
+                if (videoID.equals("")) {
+                    Toast.makeText(ChangeVideoActivity.this, "형식에 맞지 않는 URL입니다.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
-                Intent intent = new Intent();
-                intent.putExtra("NEW_URL", videoID);
-                intent.putExtra("ID", ID);
-                setResult(3, intent);
-                finish();
+                // Retrieve JSON object and parse it
+                String url = "https://www.googleapis.com/youtube/v3/videos" +
+                        "?id=" + videoID +
+                        "&key=" + API_KEY +
+                        "&part=snippet" +
+                        "&fields=items(snippet(title, thumbnails(medium),publishedAt,channelTitle))";
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder().url(url).build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response.body().string())
+                                    .getJSONArray("items")
+                                    .getJSONObject(0)
+                                    .getJSONObject("snippet");
+
+                            if (jsonObject.toString().equals(null)) {
+                                Toast.makeText(ChangeVideoActivity.this, "잘못된 URL입니다.", Toast.LENGTH_SHORT);
+                                return;
+                            }
+
+                            date = jsonObject.getString("publishedAt").substring(0, 10);
+                            title = jsonObject.getString("title");
+                            uploader = jsonObject.getString("channelTitle");
+                            thumbnail = jsonObject.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
+
+                            // Return data
+                            Intent intent = new Intent();
+                            intent.putExtra("ID", ID);
+                            intent.putExtra("VIDEOID", videoID);
+                            intent.putExtra("TITLE", title);
+                            intent.putExtra("THUMBNAIL", thumbnail);
+                            intent.putExtra("DATE", date);
+                            intent.putExtra("UPLOADER", uploader);
+                            setResult(2, intent);
+                            finish();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
 
-        cancel.setOnClickListener(new View.OnClickListener() {
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -61,6 +108,23 @@ public class ChangeVideoActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private String parseURL(String url) {
+        String videoID = "";
+        int count = 0;
+        for (int i = 0; i < url.length(); i++) {
+            if (url.charAt(i) == '/') {
+                count++;
+                continue;
+            }
+            if (count == 3) {
+                videoID = url.substring(i);
+                break;
+            }
+        }
+
+        return videoID;
     }
 
     @Override

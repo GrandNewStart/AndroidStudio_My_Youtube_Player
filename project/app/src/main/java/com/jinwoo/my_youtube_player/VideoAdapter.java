@@ -66,7 +66,7 @@ public class VideoAdapter extends BaseAdapter {
         tv_date = (TextView) convertView.findViewById(R.id.tv_date);
 
         // Getting thumbnail img from network
-        Thread thread1 = new Thread() {
+        Thread thread = new Thread() {
             @Override
             public void run() {
                 try {
@@ -83,11 +83,11 @@ public class VideoAdapter extends BaseAdapter {
                 }
             }
         };
-        thread1.start();
+        thread.start();
 
         // Mapping thumbnail
         try {
-            thread1.join();
+            thread.join();
             iv_thumbnail.setImageBitmap(bitmap);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -98,6 +98,7 @@ public class VideoAdapter extends BaseAdapter {
         tv_uploader.setText(video.getUploader());
         tv_date.setText(video.getDate());
 
+        // Hiding/Displaying item menu
         if (MainActivity.mode == MainActivity.Mode.normal)
             iv_itemMenu.setVisibility(View.VISIBLE);
         else
@@ -112,6 +113,7 @@ public class VideoAdapter extends BaseAdapter {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
+
                             // Change video
                             case R.id.item_menu1:
                                 int ID = video.getID();
@@ -119,6 +121,7 @@ public class VideoAdapter extends BaseAdapter {
                                 intent.putExtra("ID", ID);
                                 context.startActivity(intent.addFlags(FLAG_ACTIVITY_NEW_TASK));
                                 break;
+
                             // Delete video
                             case R.id.item_menu2:
                                 VideoDBHelper myDb = new VideoDBHelper(context);
@@ -133,9 +136,11 @@ public class VideoAdapter extends BaseAdapter {
                                 notifyDataSetChanged();
                                 break;
                         }
+
                         return false;
                     }
                 });
+
                 menu.inflate(R.menu.item_menu);
                 menu.show();
             }
