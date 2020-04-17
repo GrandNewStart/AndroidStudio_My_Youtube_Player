@@ -101,6 +101,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 for (int i = 0; i < videoList.size(); i++) {
                     videoList.get(i).setChecked(cb_selectAll.isChecked());
                 }
+                if (cb_selectAll.isChecked()) {
+                    selectedItems = videoList.size();
+                    tv_selectedItems.setText(selectedItems + "개 선택되었습니다");
+                }
+                else {
+                    selectedItems = 0;
+                    tv_selectedItems.setText(selectedItems + "개 선택되었습니다");
+                }
                 adapter.notifyDataSetChanged();
             }
         });
@@ -150,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                cb_selectAll.setChecked(false);
                 Video video = videoList.get(position);
                 if (mode == Mode.normal) {
                     // Play video
@@ -160,14 +169,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 else {
                     // Check items
                     video.setChecked(!video.isChecked());
-                    if (video.isChecked()) {
-                        view.setBackgroundResource(R.drawable.item_checked);
+                    adapter.notifyDataSetChanged();
+                    if (video.isChecked())
                         selectedItems++;
-                    }
-                    else {
-                        view.setBackgroundResource(R.drawable.item_unchecked);
+                    else
                         selectedItems--;
-                    }
                     tv_selectedItems.setText(selectedItems + "개 선택되었습니다");
                 }
             }

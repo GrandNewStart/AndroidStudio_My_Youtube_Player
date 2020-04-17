@@ -53,7 +53,9 @@ public class VideoAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        convertView = inflater.inflate(R.layout.item_layout, parent, false);
+        if (convertView == null)
+            convertView = inflater.inflate(R.layout.item_layout, parent, false);
+
         final Video video = videoList.get(position);
 
         iv_thumbnail = (ImageView) convertView.findViewById(R.id.img_thumbnail);
@@ -131,11 +133,16 @@ public class VideoAdapter extends BaseAdapter {
                         return false;
                     }
                 });
-
                 menu.inflate(R.menu.item_menu);
                 menu.show();
             }
         });
+
+        // Check check
+        if (video.isChecked())
+            convertView.setBackgroundResource(R.drawable.item_checked);
+        else
+            convertView.setBackgroundResource(R.drawable.item_unchecked);
 
         return convertView;
     }

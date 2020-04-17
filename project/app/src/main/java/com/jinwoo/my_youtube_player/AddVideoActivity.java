@@ -52,7 +52,7 @@ public class AddVideoActivity extends AppCompatActivity {
                         "?id=" + videoID +
                         "&key=" + API_KEY +
                         "&part=snippet" +
-                        "&fields=items(snippet(title, thumbnails(medium),publishedAt,channelTitle))";
+                        "&fields=items(snippet(title, thumbnails(default(url)),publishedAt,channelTitle))";
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder().url(url).build();
                 client.newCall(request).enqueue(new Callback() {
@@ -77,7 +77,7 @@ public class AddVideoActivity extends AppCompatActivity {
                             date = jsonObject.getString("publishedAt").substring(0, 10);
                             title = jsonObject.getString("title");
                             uploader = jsonObject.getString("channelTitle");
-                            thumbnail = jsonObject.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
+                            thumbnail = jsonObject.getJSONObject("thumbnails").getJSONObject("default").getString("url");
 
                             // Return data
                             Intent intent = new Intent();
