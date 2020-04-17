@@ -15,7 +15,10 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity android:name=".SplashScreenActivity">
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".LoginActivity"
@@ -24,12 +27,7 @@
 
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity android:name=".YoutubePlayerActivity"
             android:screenOrientation="portrait"
@@ -39,6 +37,9 @@
             android:theme="@style/Theme.AppCompat.Dialog" />
 
         <activity android:name=".ChangeVideoActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+
+        <activity android:name=".DeleteConfirmActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
 
     </application>

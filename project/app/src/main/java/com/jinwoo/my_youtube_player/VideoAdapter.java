@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,7 +12,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,20 +19,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 public class VideoAdapter extends BaseAdapter {
     private ArrayList<Video> videoList;
     private LayoutInflater inflater;
     private Context context;
+    private MainActivity activity;
     private Bitmap bitmap;
 
     private ImageView iv_thumbnail, iv_itemMenu;
     private TextView tv_title, tv_uploader, tv_date;
 
-    public VideoAdapter(ArrayList<Video> videoList, Context context) {
+    public VideoAdapter(ArrayList<Video> videoList, Context context, MainActivity activity) {
         this.videoList = videoList;
         this.context = context;
+        this.activity = activity;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -117,23 +114,17 @@ public class VideoAdapter extends BaseAdapter {
                             // Change video
                             case R.id.item_menu1:
                                 int ID = video.getID();
-                                Intent intent = new Intent(context, ChangeVideoActivity.class);
-                                intent.putExtra("ID", ID);
-                                context.startActivity(intent.addFlags(FLAG_ACTIVITY_NEW_TASK));
+                                Intent intent1 = new Intent(context, ChangeVideoActivity.class);
+                                intent1.putExtra("ID TO UPDATE", ID);
+                                activity.startActivityForResult(intent1, 2);
                                 break;
 
                             // Delete video
                             case R.id.item_menu2:
-                                VideoDBHelper myDb = new VideoDBHelper(context);
-                                Toast.makeText(context, "'" + video.getTitle() + "' (이)가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                                for (int i = 0; i < videoList.size(); i++) {
-                                    if (videoList.get(i).getID() == video.getID()) {
-                                        videoList.remove(i);
-                                        break;
-                                    }
-                                }
-                                myDb.deleteData(video.getID());
-                                notifyDataSetChanged();
+                                Intent intent2 = new Intent(context, DeleteConfirmActivity.class);
+                                intent2.putExtra("TITLE TO DELETE", video.getTitle());
+                                intent2.putExtra("ID TO DELETE", video.getID());
+                                activity.startActivityForResult(intent2, 3);
                                 break;
                         }
 
@@ -145,9 +136,6 @@ public class VideoAdapter extends BaseAdapter {
                 menu.show();
             }
         });
-
-        if (video.isChecked()) convertView.setBackgroundColor(Color.parseColor("#A07771"));
-        else convertView.setBackgroundColor(Color.parseColor("#B57171"));
 
         return convertView;
     }

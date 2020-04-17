@@ -26,7 +26,7 @@
             android:src="@drawable/icon_logo" />
 
         <TextView
-            android:id="@+id/text_top"
+            android:id="@+id/tv_top"
             android:layout_width="wrap_content"
             android:layout_height="75dp"
             android:layout_weight="9"
@@ -41,10 +41,12 @@
         android:id="@+id/listviewMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:gravity="right"
         app:layout_constraintEnd_toEndOf="@+id/title"
+        app:layout_constraintStart_toStartOf="@+id/title"
         app:layout_constraintTop_toBottomOf="@+id/title">
 
         <TextView
@@ -52,10 +54,10 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginEnd="4dp"
-            android:text="전체선택"
-            android:textSize="17dp"
+            android:layout_toLeftOf="@+id/cb_selectAll"
             android:gravity="center"
-            android:layout_toLeftOf="@+id/cb_selectAll"/>
+            android:text="전체선택"
+            android:textSize="17dp" />
 
         <CheckBox
             android:id="@+id/cb_selectAll"
@@ -63,7 +65,7 @@
             android:layout_height="40dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:gravity="center"/>
+            android:gravity="center" />
 
         <ImageView
             android:id="@+id/iv_listMenu"
@@ -72,6 +74,15 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:src="@drawable/icon_menu4" />
+
+        <TextView
+            android:id="@+id/tv_selectedItems"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="0개 선택되었습니다"
+            android:layout_toLeftOf="@id/tv_selectAll"
+            android:layout_marginRight="32dp"
+            android:gravity="center"/>
 
     </RelativeLayout>
 
@@ -85,25 +96,37 @@
         app:layout_constraintDimensionRatio="1:1.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listviewMenu" />
+        app:layout_constraintTop_toBottomOf="@+id/listviewMenu" >
+
+    </ListView>
 
     <Button
-        android:id="@+id/button_delete"
+        android:id="@+id/btn_delete"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/icon_delete"
-        app:layout_constraintBottom_toBottomOf="@+id/button_add"
-        app:layout_constraintEnd_toStartOf="@+id/button_add" />
+        android:background="@drawable/button_delete"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_add"
+        app:layout_constraintEnd_toStartOf="@+id/btn_add" />
 
     <Button
-        android:id="@+id/button_add"
+        android:id="@+id/btn_add"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/icon_add"
+        android:background="@drawable/button_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_transparent"
+        android:text="로그아웃"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/listView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

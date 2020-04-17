@@ -32,7 +32,7 @@ public class ChangeVideoActivity extends AppCompatActivity {
         setContentView(R.layout.edit_screen);
 
         Intent intent = getIntent();
-        final int ID = intent.getIntExtra("ID", -1);
+        final int ID = intent.getIntExtra("ID TO UPDATE", -1);
 
         et_url = (EditText) findViewById(R.id.et_url);
         btn_update = (Button) findViewById(R.id.btn_enter);
@@ -83,13 +83,13 @@ public class ChangeVideoActivity extends AppCompatActivity {
                             thumbnail = jsonObject.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
 
                             // Return data
-                            Intent intent = new Intent();
-                            intent.putExtra("ID", ID);
-                            intent.putExtra("VIDEOID", videoID);
-                            intent.putExtra("TITLE", title);
-                            intent.putExtra("THUMBNAIL", thumbnail);
-                            intent.putExtra("DATE", date);
-                            intent.putExtra("UPLOADER", uploader);
+                            Intent intent = new Intent(ChangeVideoActivity.this, MainActivity.class);
+                            intent.putExtra("ID TO UPDATE", ID);
+                            intent.putExtra("THUMBNAIL TO UPDATE", thumbnail);
+                            intent.putExtra("TITLE TO UPDATE", title);
+                            intent.putExtra("UPLOADER TO UPDATE", uploader);
+                            intent.putExtra("DATE TO UPDATE", date);
+                            intent.putExtra("VIDEO ID TO UPDATE", videoID);
                             setResult(2, intent);
                             finish();
                         } catch (JSONException e) {

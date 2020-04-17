@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,8 +20,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     private ListView listView;
-    private TextView tv_top, tv_selectAll;
-    private Button btn_add, btn_delete;
+    private TextView tv_top, tv_selectAll, tv_selectedItems;
+    private Button btn_add, btn_delete, btn_logout;
     private ImageView iv_listMenu;
     private CheckBox cb_selectAll;
 
@@ -32,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private VideoDBHelper myDb;
     public enum Mode {normal, check};
     public static Mode mode = Mode.normal;
+    private int selectedItems = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,14 +41,17 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         // View mapping
         iv_listMenu = (ImageView) findViewById(R.id.iv_listMenu);
         listView = (ListView) findViewById(R.id.listView);
-        btn_add = (Button) findViewById(R.id.button_add);
-        btn_delete = (Button) findViewById(R.id.button_delete);
-        tv_top = (TextView) findViewById(R.id.text_top);
+        btn_add = (Button) findViewById(R.id.btn_add);
+        btn_delete = (Button) findViewById(R.id.btn_delete);
+        btn_logout = (Button) findViewById(R.id.btn_logout);
+        tv_top = (TextView) findViewById(R.id.tv_top);
         tv_selectAll = (TextView) findViewById(R.id.tv_selectAll);
+        tv_selectedItems = (TextView) findViewById(R.id.tv_selectedItems);
         cb_selectAll = (CheckBox) findViewById(R.id.cb_selectAll);
 
         btn_delete.setVisibility(View.INVISIBLE);
         tv_selectAll.setVisibility(View.INVISIBLE);
+        tv_selectedItems.setVisibility(View.INVISIBLE);
         cb_selectAll.setVisibility(View.INVISIBLE);
 
         Intent intent = getIntent();
@@ -76,10 +79,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 videoList.add(video);
             }
         }
-        adapter = new VideoAdapter(videoList, getApplicationContext());
+        adapter = new VideoAdapter(videoList, getApplicationContext(), this);
         listView.setAdapter(adapter);
 
         // Set click listeners
+        // Listview menu
         iv_listMenu.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -101,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
+        // Add video
         btn_add.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -111,27 +116,37 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
+        // Delete video
         btn_delete.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                int i = 0, count = 0;
+                int i = 0;
 
                 while (videoList.size() > i) {
                     Video video = videoList.get(i);
                     if(video.isChecked()) {
                         videoList.remove(i);
                         myDb.deleteData(video.getID());
-                        count++;
                         continue;
                     }
                     i++;
                 }
 
-                Toast.makeText(getApplicationContext(), "비디오 " + count + "개가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "비디오 " + selectedItems + "개가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                 setListMode(Mode.normal);
             }
         });
 
+        // Log out
+        btn_logout.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                finish();
+            }
+        });
+
+        // Listview item click
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -145,8 +160,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 else {
                     // Check items
                     video.setChecked(!video.isChecked());
-                    if (video.isChecked()) view.setBackgroundColor(Color.parseColor("#A07771"));
-                    else view.setBackgroundColor(Color.parseColor("#B57171"));
+                    if (video.isChecked()) {
+                        view.setBackgroundResource(R.drawable.item_checked);
+                        selectedItems++;
+                    }
+                    else {
+                        view.setBackgroundResource(R.drawable.item_unchecked);
+                        selectedItems--;
+                    }
+                    tv_selectedItems.setText(selectedItems + "개 선택되었습니다");
                 }
             }
         });
@@ -154,12 +176,16 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void setListMode(Mode newMode) {
         mode = newMode;
+        selectedItems = 0;
+        tv_selectedItems.setText(selectedItems + "개 선택되었습니다.");
         switch(mode) {
             case normal:
                 tv_top.setText(Google_nick + "님의\n저장된 재생 목록");
                 tv_top.setTextSize(15);
+                listView.setBackgroundColor(Color.TRANSPARENT);
                 btn_delete.setVisibility(View.INVISIBLE);
                 tv_selectAll.setVisibility(View.INVISIBLE);
+                tv_selectedItems.setVisibility(View.INVISIBLE);
                 cb_selectAll.setVisibility(View.INVISIBLE);
                 iv_listMenu.setVisibility(View.VISIBLE);
                 for (int i = 0; i < videoList.size(); i++) {
@@ -170,8 +196,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             case check:
                 tv_top.setText("삭제할 동영상을 선택하십시오");
                 tv_top.setTextSize(15);
+                listView.setBackgroundColor(Color.parseColor("#B57171"));
                 btn_delete.setVisibility(View.VISIBLE);
                 tv_selectAll.setVisibility(View.VISIBLE);
+                tv_selectedItems.setVisibility(View.VISIBLE);
                 cb_selectAll.setVisibility(View.VISIBLE);
                 iv_listMenu.setVisibility(View.INVISIBLE);
                 cb_selectAll.setChecked(false);
@@ -215,31 +243,55 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             videoList.add(video);
             adapter.notifyDataSetChanged();
-
+            return;
         }
-
-        // If an existing video is to be updated
+        // If the selected video is to be updated
         else if (resultCode == 2) {
-            int ID = data.getIntExtra("ID", -1);
-            String videoID = data.getStringExtra("VIDEOID");
-            String title = data.getStringExtra("TITLE");
-            String thumbnail = data.getStringExtra("THUMBNAIL");
-            String date = data.getStringExtra("DATE");
-            String uploader = data.getStringExtra("UPLOADER");
-            Video video = new Video(thumbnail, title, uploader, date, videoID);
-            Log.d("LOG", ID + ", " + video.getTitle());
-            myDb.updateData(ID, video);
+            int id_to_update = data.getIntExtra("ID TO UPDATE", -1);
+            String thumbnail_to_update = data.getStringExtra("THUMBNAIL TO UPDATE");
+            String title_to_update = data.getStringExtra("TITLE TO UPDATE");
+            String uploader_to_update = data.getStringExtra("UPLOADER TO UPDATE");
+            String date_to_update = data.getStringExtra("DATE TO UPDATE");
+            String videoId_to_update = data.getStringExtra("VIDEO ID TO UPDATE");
+
+            Video video = new Video(thumbnail_to_update
+                                    ,title_to_update
+                                    ,uploader_to_update
+                                    ,date_to_update
+                                    ,videoId_to_update);
+            myDb.updateData(id_to_update, video);
 
             for (int i = 0; i < videoList.size(); i++) {
-                if (videoList.get(i).getID() == ID) {
-                    videoList.get(i).setTitle(title);
-                    videoList.get(i).setThumbnail(thumbnail);
-                    videoList.get(i).setDate(date);
-                    videoList.get(i).setUploader(uploader);
-                    videoList.get(i).setVideoID(videoID);
+                if (videoList.get(i).getID() == id_to_update) {
+                    videoList.get(i).setThumbnail(thumbnail_to_update);
+                    videoList.get(i).setTitle(title_to_update);
+                    videoList.get(i).setUploader(uploader_to_update);
+                    videoList.get(i).setDate(date_to_update);
+                    videoList.get(i).setVideoID(videoId_to_update);
                     adapter.notifyDataSetChanged();
                     break;
                 }
+            }
+            return;
+        }
+        // If the selected video is to be deleted
+        else if (resultCode == 3) {
+            boolean response = data.getBooleanExtra("RESPONSE", false);
+            if (response) {
+                int id_to_delete = data.getIntExtra("ID TO DELETE", -1);
+                String title_to_delete = data.getStringExtra("TITLE TO DELETE");
+
+                for (int i = 0; i < videoList.size(); i++) {
+                    if (videoList.get(i).getID() == id_to_delete) {
+                        videoList.remove(i);
+                        break;
+                    }
+                }
+
+                myDb.deleteData(id_to_delete);
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this, "'" + title_to_delete + "' (이)가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                return;
             }
         }
     }
